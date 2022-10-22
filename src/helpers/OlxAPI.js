@@ -3,6 +3,25 @@ import qs from 'qs';
 
 const BASEAPI = '';
 
+const apiFetchFile = async (endpoint, body) => {
+	if (!body.token) {
+		let token = Cookies.get('token');
+		if (token) {
+			body.append('token', token);
+		}
+	}
+	const res = await fetch(BASEAPI + endpoint, {
+		method: 'POST',
+		body
+	});
+	const json = await res.json();
+	if (json.notallowed) {
+		window.location.href = '/signin';
+		return;
+	}
+	return json;
+}
+
 const apiFetchPost = async (endpoint, body) => {
 	if (!body.token) {
 		let token = Cookies.get('token');
@@ -96,8 +115,15 @@ const OlxAPI = {
 			{ id, otherAds }
 		);
 		return json;
-	}
+	},
 	
+	addAd: async (fData) => {
+		const resp = await apiFetchFile(
+			'ad/add',
+			fData
+		);
+		return resp;
+	}
 };
 
 export default () => OlxAPI;
